@@ -61,3 +61,5 @@ target_link_libraries(podcastd
         ${GOBJECT_LIBRARIES}
         ${LIBMPDCLIENT_LIBRARIES}
         )
+install(TARGETS podcastd
+        RUNTIME DESTINATION bin)
