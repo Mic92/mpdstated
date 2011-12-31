@@ -248,12 +248,30 @@ public static void on_posix_finish(int sig) {
 }
 
 class Main : Object {
-    private static Mpc cli;
     public static MainContext app_context;
 
+    // user_options
+    private static string host = null;
+    private static int port = 6600;
+    private static string password = null;
+    private static string podcast_path = null;
+
+    const OptionEntry[] options = {
+        { "host", 'h', 0, OptionArg.STRING, ref host,
+            "address used to wait before swapping background [localhost]", "HOST" },
+        { "port", 'p', 0, OptionArg.INT, ref port,
+            "Port used to connect [6600] ", "PORT" },
+        { "password", '\0', 0, OptionArg.STRING, ref password,
+            "address used to connect []", "SECRET" },
+        { "podcast-path", 'd', 0, OptionArg.STRING, ref podcast_path,
+            "tracked path relative to your music path [podcasts]", "PATH" },
+        { null }
+    };
+
+    // Internal data
+    private static Mpc cli;
     private static string lastsong_uri;
     private static uint lastsong_pos;
-    private static unowned string podcast_path = "podcast";
 
     public static void on_mpd_idle(int idle) {
         if (idle == Mpd.Idle.PLAYER) {
@@ -294,8 +312,22 @@ class Main : Object {
         var loop = new MainLoop();
         var idle_timer  = new TimeoutSource(400);
         var state_timer = new TimeoutSource(1000);
-        const string host = "localhost";
-        const int port = 6600;
+
+        try {
+            var opt = new OptionContext("- make mpd to resume podcasts, where your stopped");
+            opt.set_help_enabled(true);
+            opt.add_main_entries(options, null);
+            opt.parse(ref args);
+        }
+        catch (GLib.Error e) {
+            stderr.printf("Error: %s\n", e.message);
+            stderr.printf("Run '%s --help' to see a full list of available "+
+                    "options\n", args[0]);
+            return 1;
+        }
+        // default values
+        host = host == null ? "localhost" : host;
+        podcast_path = podcast_path == null ? "podcasts" : host;
 
         // clear loghandler;
         Log.set_handler(null, LogLevelFlags.LEVEL_MASK, () => {return;});
@@ -304,7 +336,7 @@ class Main : Object {
         Log.set_handler(null, log_mask, Log.default_handler);
 
         try {
-            cli = new Mpc(host, port, null);
+            cli = new Mpc(host, port, password);
         } catch (MpcError e) {
             // TODO retry it instead
             error("Failed to connect to '%s:%d': %s\n", host, port, e.message);
