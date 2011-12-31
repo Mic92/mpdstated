@@ -282,6 +282,7 @@ class Main : Object {
     private static int port = 6600;
     private static string password = null;
     private static string podcast_path = null;
+    private static bool verbose = false;
 
     const OptionEntry[] options = {
         { "host", 'h', 0, OptionArg.STRING, ref host,
@@ -290,6 +291,8 @@ class Main : Object {
             "Port used to connect [6600] ", "PORT" },
         { "password", '\0', 0, OptionArg.STRING, ref password,
             "address used to connect []", "SECRET" },
+        { "verbose", 'v', 0, OptionArg.NONE, ref verbose,
+            "verbose logging [off]", null },
         { "podcast-path", 'd', 0, OptionArg.STRING, ref podcast_path,
             "tracked path relative to your music path [podcasts]", "PATH" },
         { null }
