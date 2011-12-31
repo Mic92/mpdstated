@@ -1,4 +1,4 @@
 Build requirements
-- libmpdclient (the library mpc use too)
+- libmpdclient (the library mpc uses too)
 - vala (implies glib and gobject)
 - cmake
