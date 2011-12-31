@@ -1,0 +1,10 @@
+# make it configureable
+add optionparser
+add Keyfile based config
+
+# documentation
+add README
+add install instruction
+
+# later features
+synching with other distance (shared json file?)
