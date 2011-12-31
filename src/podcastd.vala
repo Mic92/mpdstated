@@ -40,12 +40,16 @@ errordomain MpcError {
 class Mpc : Object {
     public signal void on_idle (int idle);
     public signal void on_close ();
+
     public Mpd.Connection conn;
     private Mpd.Connection idle_conn;
+
     private string host = "localhost";
     private string? password = null;
     private int port = 6600;
+
     private bool keep_idle = false;
+    private Mpd.Idle idle_mask;
 
     public Mpc(string host, int port, string? password = null) throws MpcError {
         this.host = host;
@@ -108,23 +112,46 @@ class Mpc : Object {
         throw err;
     }
 
-    public void open_idle() throws MpcError {
-        debug("open idle.\n");
+    public void open_idle(Mpd.Idle mask) throws MpcError {
+        debug("open idle.");
         this.keep_idle = true;
+        this.idle_mask = mask;
         this.idle_conn = new Connection(this.host, this.port, 5);
+        this.idle_conn.set_timeout(2000);
         assert_no_mpd_err(this.idle_conn);
+        var chan = new IOChannel.unix_new(this.idle_conn.fd);
+        chan.add_watch(IOCondition.ERR | IOCondition.HUP |
+                       IOCondition.IN, check_idle);
+        this.idle_conn.send_idle_mask(this.idle_mask);
     }
 
-    public void do_idle() throws MpcError {
-        debug("do idle.\n");
-        //TODO use idle mask
-        var idle = this.idle_conn.run_idle();
-        if (idle == 0) {
-            assert_no_mpd_err(this.idle_conn);
-            // if no error occurs
+    public bool check_idle(IOChannel src, IOCondition cond) {
+        debug("do idle.");
+
+        var events = this.idle_conn.recv_idle(false);
+
+        debug("idle event: %d", events);
+        if (events == 0) {
+            try {
+                assert_no_mpd_err(this.idle_conn);
+            } catch (MpcError e) {
+                message("error while idling: %s", e.message);
+            }
         } else {
-            on_idle(idle);
+            debug("handle event");
+            on_idle(events);
         }
+
+        var res = this.idle_conn.send_idle_mask(this.idle_mask);
+
+        if (res) {
+            try {
+                assert_no_mpd_err(this.idle_conn);
+            } catch (MpcError e) {
+                message("error while idling: %s", e.message);
+            }
+        }
+        return true;
     }
 
     public void close_idle() {
@@ -142,7 +169,7 @@ class Mpc : Object {
 
         if (keep_idle) {
             try {
-                this.open_idle();
+                this.open_idle(this.idle_mask);
             } catch (MpcError e) {
                 return false;
             }
@@ -274,29 +301,26 @@ class Main : Object {
     private static uint lastsong_pos;
 
     public static void on_mpd_idle(int idle) {
-        if (idle == Mpd.Idle.PLAYER) {
-            debug("playstate changes!\n");
-            try {
-                var song = cli.get_current_song();
-                if (song == null) return;
-                if (lastsong_uri != null && song.uri != lastsong_uri) {
-                    if (lastsong_uri.has_prefix(podcast_path)) {
-                        debug("store podcast state\n");
-                        cli.set_elapsed_time(lastsong_uri, lastsong_pos);
-                    }
-                    if (song.uri.has_prefix(podcast_path)) {
-                        debug("restore podcast state\n");
-                        var pos = cli.get_elapsed_time(song.uri);
-                        if (pos != 0) {
-                            cli.seek_song(song, pos);
-                            lastsong_pos = pos;
-                        }
+        try {
+            var song = cli.get_current_song();
+            if (song == null) return;
+            if (lastsong_uri != null && song.uri != lastsong_uri) {
+                if (lastsong_uri.has_prefix(podcast_path)) {
+                    debug("store podcast state");
+                    cli.set_elapsed_time(lastsong_uri, lastsong_pos);
+                }
+                if (song.uri.has_prefix(podcast_path)) {
+                    debug("restore podcast state");
+                    var pos = cli.get_elapsed_time(song.uri);
+                    if (pos != 0) {
+                        cli.seek_song(song, pos);
+                        lastsong_pos = pos;
                     }
                 }
-                lastsong_uri = song.uri.dup();
-            } catch(MpcError e) {
-                warning("Error while dispatching idle event: %s\n", e.message);
             }
+            lastsong_uri = song.uri.dup();
+        } catch(MpcError e) {
+            warning("Error while dispatching idle event: %s", e.message);
         }
     }
 
@@ -310,8 +334,7 @@ class Main : Object {
 
     public static int main(string[] args) {
         var loop = new MainLoop();
-        var idle_timer  = new TimeoutSource(400);
-        var state_timer = new TimeoutSource(1000);
+        var state_timer = new TimeoutSource.seconds(1);
 
         try {
             var opt = new OptionContext("- make mpd to resume podcasts, where your stopped");
@@ -334,32 +357,26 @@ class Main : Object {
 
         var log_mask = LogLevelFlags.LEVEL_ERROR | LogLevelFlags.FLAG_FATAL | LogLevelFlags.LEVEL_MESSAGE
                         | LogLevelFlags.LEVEL_WARNING | LogLevelFlags.LEVEL_CRITICAL;
+        if (verbose) {
+            log_mask = log_mask | LogLevelFlags.LEVEL_DEBUG;
+        }
         Log.set_handler(null, log_mask, Log.default_handler);
 
-        message("Successfully connected to %s:%d\n", host, port);
+        message("Successfully connected to %s:%d", host, port);
         try {
             cli = new Mpc(host, port, password);
         } catch (MpcError e) {
             // TODO retry it instead
-            error("Failed to connect to '%s:%d': %s\n", host, port, e.message);
+            error("Failed to connect to '%s:%d': %s", host, port, e.message);
         }
 
         try {
             if (!cli.has_sticker()) {
-                error("Mpd didn't have sticker support! This is essentially needed!\n");
+                error("Mpd didn't have sticker support! This is essentially needed!");
             }
         } catch (MpcError e) {
-            error("Fail on check sticker support!\n");
+            error("Fail on check sticker support!");
         }
-
-        idle_timer.set_callback(() => {
-            try {
-                cli.do_idle();
-            } catch (MpcError e) {
-                warning("Error while ideling: %s", e.message);
-            }
-            return true;
-        });
 
         state_timer.set_callback(() => {
             int retry = 3;
@@ -370,7 +387,7 @@ class Main : Object {
                     var status = cli.get_status();
                     if (song.uri.has_prefix(podcast_path)) {
                         lastsong_pos = status.get_elapsed_time();
-                        debug("get podcast position: %us\n", lastsong_pos);
+                        debug("get podcast position: %us", lastsong_pos);
                     }
                     retry = 0;
                 } catch (MpcError e) {
@@ -385,13 +402,12 @@ class Main : Object {
         cli.on_close.connect(on_mpd_close);
 
         try {
-            cli.open_idle();
+            cli.open_idle(Mpd.Idle.PLAYER);
         } catch (MpcError e) {
-            error("Failed to going idle: %s\n", e.message);
+            error("Failed to going idle: %s", e.message);
         }
 
         app_context = loop.get_context();
-        idle_timer.attach(app_context);
         state_timer.attach(app_context);
 
         Posix.signal(Posix.SIGQUIT, on_posix_finish);
