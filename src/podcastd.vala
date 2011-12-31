@@ -69,7 +69,7 @@ class Mpc : Object {
         assert_no_mpd_err(conn);
         if (password != null) {
             if (!this.conn.run_password(password)) {
-                throw new MpcError.AUTH("Password refused by server\n");
+                throw new MpcError.AUTH("Password refused by server");
             }
         }
     }
@@ -104,7 +104,7 @@ class Mpc : Object {
                 err = new MpcError.TIMEOUT(msg); break;
             default:
                 int err_code = mpd_err;
-                err = new MpcError.UNKNOWN(@"Failed to translate error code '$err_code': '$msg'\n");
+                err = new MpcError.UNKNOWN(@"Failed to translate error code '$err_code': '$msg'");
                 break;
         };
         if (!conn.clear_error()) on_close();
@@ -179,7 +179,7 @@ class Mpc : Object {
     }
 
     public Song? get_current_song() throws MpcError {
-        debug("get current song!\n");
+        debug("get current song!");
         var song = this.conn.run_current_song();
 
         if (song == null) {
@@ -190,7 +190,7 @@ class Mpc : Object {
     }
 
     public void seek_song(Song song, uint sec) throws MpcError {
-        debug("seek id.\n");
+        debug("seek id.");
 
         var res = this.conn.run_seek_id(song.id, sec);
 
@@ -200,7 +200,7 @@ class Mpc : Object {
     }
 
     public uint get_elapsed_time(string uri) throws MpcError {
-        debug("get elapsed time.\n");
+        debug("get elapsed time.");
         var res = this.conn.send_sticker_get("song", uri, "elapsed_time");
 
         if (!res) {
@@ -226,7 +226,7 @@ class Mpc : Object {
     }
 
     public void set_elapsed_time(string uri, uint sec) throws MpcError {
-        debug("set elapsed time on %s.\n", uri);
+        debug("set elapsed time on %s.", uri);
         var res = this.conn.run_sticker_set("song", uri, "elapsed_time", sec.to_string());
 
         if (!res) {
@@ -235,7 +235,7 @@ class Mpc : Object {
     }
 
     public Mpd.Status get_status() throws MpcError {
-        debug("get status id.\n");
+        debug("get status id.");
         var status = this.conn.run_status();
 
         if (status == null) {
@@ -245,7 +245,7 @@ class Mpc : Object {
     }
 
     public bool has_sticker() throws MpcError {
-        debug("check sticker.\n");
+        debug("check sticker.");
         var res = this.conn.send_allowed_commands();
 
         if (!res) {
@@ -270,7 +270,7 @@ class Mpc : Object {
 }
 
 public static void on_posix_finish(int sig) {
-    message("Recieve kill signal. Goodbye!\n");
+    message("Recieve kill signal. Goodbye!");
     Posix.exit(0);
 }
 
@@ -326,10 +326,10 @@ class Main : Object {
 
     public static void on_mpd_close() {
         while(!cli.reconnect()) {
-            stderr.printf("Fails to reconnet try it again in 10 sec!\n");
+            stderr.printf("Fails to reconnet try it again in 10 sec!");
             Posix.sleep(10);
         }
-        message("Reconnect successfully!\n");
+        message("Reconnect successfully!");
     }
 
     public static int main(string[] args) {
