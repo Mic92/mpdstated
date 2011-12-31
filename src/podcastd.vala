@@ -399,6 +399,6 @@ class Main : Object {
         Posix.signal(Posix.SIGKILL, on_posix_finish);
 
         loop.run();
-        return 1;
+        return 0;
     }
 }
