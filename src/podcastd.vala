@@ -378,15 +378,14 @@ class Main : Object {
         host = host == null ? "localhost" : host;
         podcast_path = podcast_path == null ? "podcasts" : host;
 
-        // clear loghandler;
-        Log.set_handler(null, LogLevelFlags.LEVEL_MASK, () => {return;});
+        if (!verbose) {
+            // clear loghandler;
+            Log.set_handler(null, LogLevelFlags.LEVEL_MASK, () => {return;});
 
-        var log_mask = LogLevelFlags.LEVEL_ERROR | LogLevelFlags.FLAG_FATAL | LogLevelFlags.LEVEL_MESSAGE
-                        | LogLevelFlags.LEVEL_WARNING | LogLevelFlags.LEVEL_CRITICAL;
-        if (verbose) {
-            log_mask = log_mask | LogLevelFlags.LEVEL_DEBUG;
+            var log_mask = LogLevelFlags.LEVEL_ERROR | LogLevelFlags.FLAG_FATAL | LogLevelFlags.LEVEL_MESSAGE
+                | LogLevelFlags.LEVEL_WARNING | LogLevelFlags.LEVEL_CRITICAL;
+            Log.set_handler(null, log_mask, Log.default_handler);
         }
-        Log.set_handler(null, log_mask, Log.default_handler);
 
         message("Successfully connected to %s:%d", host, port);
         try {
