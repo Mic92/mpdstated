@@ -204,14 +204,17 @@ class Mpc : Object {
         var res = this.conn.send_sticker_get("song", uri, "elapsed_time");
 
         if (!res) {
-            assert_no_mpd_err(conn);
+            if (this.conn.get_error() == Mpd.Error.SERVER) {
+                // sticker doesn't exist in this case.
+                this.conn.clear_error();
+                return 0;
+            } else {
+                assert_no_mpd_err(conn);
+            }
         }
 
         var pair = this.conn.recv_sticker();
-
-        if (pair == null) {
-            return 0;
-        }
+        assert_no_mpd_err(conn);
 
         var last_pos = int.parse(pair.value);
         this.conn.return_sticker(pair);
