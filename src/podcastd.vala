@@ -350,6 +350,24 @@ class Main : Object {
         }
     }
 
+    public static bool update_status() {
+        try {
+            var song = cli.get_current_song();
+            if (song == null) return true;
+            var status = cli.get_status();
+            if (song.uri.has_prefix(podcast_path)) {
+                if (lastsong_uri == null || song.uri != lastsong_uri) {
+                    lastsong_uri = song.uri;
+                }
+                lastsong_pos = status.get_elapsed_time();
+                debug("get podcast position: %us", lastsong_pos);
+            }
+        } catch (MpcError e) {
+            warning("Error while getting song updates: %s", e.message);
+        }
+        return true;
+    }
+
     public static void on_mpd_close() {
         while(!cli.reconnect()) {
             stderr.printf("Fails to reconnet try it again in 10 sec!");
@@ -360,15 +378,14 @@ class Main : Object {
 
     public static int main(string[] args) {
         var loop = new MainLoop();
-        var state_timer = new TimeoutSource.seconds(1);
+        var update_timer = new TimeoutSource.seconds(1);
 
         try {
             var opt = new OptionContext("- make mpd to resume podcasts, where your stopped");
             opt.set_help_enabled(true);
             opt.add_main_entries(options, null);
             opt.parse(ref args);
-        }
-        catch (GLib.Error e) {
+        } catch (GLib.Error e) {
             stderr.printf("Error: %s\n", e.message);
             stderr.printf("Run '%s --help' to see a full list of available "+
                     "options\n", args[0]);
@@ -403,28 +420,9 @@ class Main : Object {
             error("Fail on check sticker support!");
         }
 
-        state_timer.set_callback(() => {
-            int retry = 3;
-            do {
-                try {
-                    var song = cli.get_current_song();
-                    if (song == null) return true;
-                    var status = cli.get_status();
-                    if (song.uri.has_prefix(podcast_path)) {
-                        if (lastsong_uri == null || song.uri != lastsong_uri) {
-                            lastsong_uri = song.uri;
-                        }
-                        lastsong_pos = status.get_elapsed_time();
-                        debug("get podcast position: %us", lastsong_pos);
-                    }
-                    retry = 0;
-                } catch (MpcError e) {
-                    warning("Error while getting song updates: %s", e.message);
-                    retry--;
-                }
-            } while(retry > 0);
-            return true;
-        });
+        app_context = loop.get_context();
+        update_timer.attach(app_context);
+        update_timer.set_callback(update_status);
 
         cli.on_idle.connect(on_mpd_idle);
         cli.on_close.connect(on_mpd_close);
@@ -434,9 +432,6 @@ class Main : Object {
         } catch (MpcError e) {
             error("Failed to going idle: %s", e.message);
         }
-
-        app_context = loop.get_context();
-        state_timer.attach(app_context);
 
         Posix.signal(Posix.SIGINT, on_posix_finish);
         Posix.signal(Posix.SIGQUIT, on_posix_finish);
