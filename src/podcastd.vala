@@ -436,9 +436,9 @@ class Main : Object {
         app_context = loop.get_context();
         state_timer.attach(app_context);
 
+        Posix.signal(Posix.SIGINT, on_posix_finish);
         Posix.signal(Posix.SIGQUIT, on_posix_finish);
         Posix.signal(Posix.SIGTERM, on_posix_finish);
-        Posix.signal(Posix.SIGKILL, on_posix_finish);
 
         loop.run();
         return 0;
