@@ -135,7 +135,7 @@ class Mpc : Object {
             try {
                 assert_no_mpd_err(this.idle_conn);
             } catch (MpcError e) {
-                message("error while idling: %s", e.message);
+                message("error while idleing: %s", e.message);
             }
         } else {
             debug("handle event");
@@ -148,7 +148,7 @@ class Mpc : Object {
             try {
                 assert_no_mpd_err(this.idle_conn);
             } catch (MpcError e) {
-                message("error while idling: %s", e.message);
+                message("error while idleing: %s", e.message);
             }
         }
         return true;
