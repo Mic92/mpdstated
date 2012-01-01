@@ -14,6 +14,7 @@ Install podcastd and start it like this:
 Replace my-podcast-directory with your directory, where your podcast are located.
 Let's say your mpd music directory is */home/fred/musik* and you store your podcast in */home/fred/musik/podcasts*,
 then your podcast directory is *podcasts*. (sub-directories and sub-sub-directories are allowed too!)
+
 That's all.
 
 For more options see:
@@ -28,9 +29,10 @@ podcastd uses this awesome sticker feature introduced in mpd v0.15 to store the 
 How to build
 ============
 install the following tools/libraries:
- - libmpdclient (the library mpc uses too)
- - vala (implies glib and gobject)
- - cmake
+
+  - libmpdclient (the library mpc uses too)
+  - vala (implies glib and gobject)
+  - cmake
 
 Clone the repository and cd into it:
 
