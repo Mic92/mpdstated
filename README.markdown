@@ -60,4 +60,4 @@ Currently there are no deb/rpm-packages.
 I would really appreciate, if someone with a launchpad account
 or opensuse build-service account could do this.
 
-For archlinux exist a PKGBUILD, which you could use.
+For archlinux exists a PKGBUILD, which you could use.
