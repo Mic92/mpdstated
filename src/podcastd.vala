@@ -409,6 +409,9 @@ class Main : Object {
                     if (song == null) return true;
                     var status = cli.get_status();
                     if (song.uri.has_prefix(podcast_path)) {
+                        if (lastsong_uri == null || song.uri != lastsong_uri) {
+                            lastsong_uri = song.uri;
+                        }
                         lastsong_pos = status.get_elapsed_time();
                         debug("get podcast position: %us", lastsong_pos);
                     }
