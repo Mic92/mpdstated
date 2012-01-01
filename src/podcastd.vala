@@ -254,11 +254,9 @@ class Mpc : Object {
             assert_no_mpd_err(conn);
         }
 
-        Pair pair = null;
-        bool found = false;
-
+        var found = false;
         while(true) {
-            pair = this.conn.recv_pair();
+            var pair = this.conn.recv_pair();
             if (pair == null)
                 break;
 
