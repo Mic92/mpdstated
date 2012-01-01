@@ -267,6 +267,28 @@ class Mpc : Object {
         return found;
     }
 
+    public void subscribe(string channel) throws MpcError {
+        var res = this.conn.run_subscribe(channel);
+        if (!res) assert_no_mpd_err(conn);
+    }
+
+    public bool has_channel(string channel) throws MpcError {
+        var res = this.conn.send_channels();
+        if (!res) assert_no_mpd_err(conn);
+
+        var found = false;
+        while (true) {
+            var pair = this.conn.recv_channel_pair();
+            if (pair == null) {
+                assert_no_mpd_err(conn);
+                break;
+            }
+            found = found || pair.value == channel;
+            this.conn.return_pair(pair);
+        }
+        return found;
+    }
+
 }
 
 public static void on_posix_finish(int sig) {
@@ -415,6 +437,16 @@ class Main : Object {
             }
         } catch (MpcError e) {
             error("Fail on check sticker support: %s", e.message);
+        }
+
+        try {
+            if (cli.has_channel("podcastd")) {
+                message("Found another podcastd instance. Quit!");
+                Posix.exit(1);
+            }
+            cli.subscribe("podcastd");
+        } catch (MpcError e) {
+            error("Fail on subscribing channel: %s", e.message);
         }
 
         app_context = loop.get_context();
