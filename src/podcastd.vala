@@ -116,8 +116,7 @@ class Mpc : Object {
         debug("open idle.");
         this.keep_idle = true;
         this.idle_mask = mask;
-        this.idle_conn = new Connection(this.host, this.port, 5);
-        this.idle_conn.set_timeout(2000);
+        this.idle_conn = new Connection(this.host, this.port);
         assert_no_mpd_err(this.idle_conn);
         var chan = new IOChannel.unix_new(this.idle_conn.fd);
         chan.add_watch(IOCondition.ERR | IOCondition.HUP |
