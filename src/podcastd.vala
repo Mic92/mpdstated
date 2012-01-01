@@ -290,6 +290,7 @@ class Main : Object {
     private static string password = null;
     private static string podcast_path = null;
     private static bool verbose = false;
+    private static bool no_daemon = false;
 
     const OptionEntry[] options = {
         { "host", 'h', 0, OptionArg.STRING, ref host,
@@ -300,6 +301,8 @@ class Main : Object {
             "address used to connect []", "SECRET" },
         { "verbose", 'v', 0, OptionArg.NONE, ref verbose,
             "verbose logging [off]", null },
+        { "no-deamon", '\0', 0, OptionArg.NONE, ref no_daemon,
+            "don't detach from console [off]", null },
         { "podcast-path", 'd', 0, OptionArg.STRING, ref podcast_path,
             "tracked path relative to your music path [podcasts]", "PATH" },
         { null }
@@ -440,6 +443,15 @@ class Main : Object {
         Posix.signal(Posix.SIGQUIT, on_posix_finish);
         Posix.signal(Posix.SIGTERM, on_posix_finish);
 
+        if (!no_daemon) {
+            var pid = Posix.fork();
+            if (pid == -1) {
+                warning("Failed to fork into background\n");
+            } else if (pid != 0) {
+                message("fork into background\n");
+                Posix.exit(0);
+            }
+        }
         loop.run();
         return 0;
     }
