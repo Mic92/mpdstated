@@ -414,7 +414,7 @@ class Main : Object {
                 error("Mpd didn't have sticker support! This is essentially needed!");
             }
         } catch (MpcError e) {
-            error("Fail on check sticker support!");
+            error("Fail on check sticker support: %s", e.message);
         }
 
         app_context = loop.get_context();
