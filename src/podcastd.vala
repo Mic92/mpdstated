@@ -273,8 +273,12 @@ class Mpc : Object {
 }
 
 public static void on_posix_finish(int sig) {
-    message("Recieve kill signal. Goodbye!");
-    Posix.exit(0);
+    message("Recieve kill signal. Save latest changes");
+    if(Main.on_app_exit()) {
+        Posix.exit(0);
+    } else {
+        Posix.exit(1);
+    }
 }
 
 class Main : Object {
@@ -305,6 +309,19 @@ class Main : Object {
     private static Mpc cli;
     private static string lastsong_uri;
     private static uint lastsong_pos;
+
+    public static bool on_app_exit() {
+        if (lastsong_uri == null) return true;
+        if (lastsong_uri.has_prefix(podcast_path)) {
+            try {
+                cli.set_elapsed_time(lastsong_uri, lastsong_pos);
+            } catch (MpcError e) {
+                message("Error saving changes: %s\n",e.message);
+                return false;
+            }
+        }
+        return true;
+    }
 
     public static void on_mpd_idle(int idle) {
         try {
