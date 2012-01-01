@@ -36,7 +36,7 @@ install the following tools/libraries:
 
 Clone the repository and cd into it:
 
-    git clone https://Mic92@github.com/Mic92/podcastd.git
+    git clone https://github.com/Mic92/podcastd.git
     cd podcastd
 
 Then just run the following commands:
