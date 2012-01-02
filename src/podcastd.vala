@@ -246,49 +246,41 @@ class Mpc : Object {
         return status;
     }
 
-    public bool has_sticker() throws MpcError {
-        debug("check sticker.");
+    public HashTable<string, bool> get_commands() throws MpcError {
+        debug("get commands.");
         var res = this.conn.send_allowed_commands();
+        if (!res) assert_no_mpd_err(conn);
+        var table = new HashTable<string, bool>(str_hash, str_equal);
 
-        if (!res) {
-            assert_no_mpd_err(conn);
-        }
-
-        var found = false;
         while(true) {
             var pair = this.conn.recv_pair();
-            if (pair == null)
-                break;
-
-            found = found || pair.value == "sticker";
+            if (pair == null) break;
+            table.insert(pair.value, true);
             this.conn.return_pair(pair);
-        };
+        }
 
-        return found;
+        return table;
     }
-#if USE_CHANNELS
     public void subscribe(string channel) throws MpcError {
         var res = this.conn.run_subscribe(channel);
         if (!res) assert_no_mpd_err(conn);
     }
 
     public bool has_channel(string channel) throws MpcError {
+        debug("check channel.");
         var res = this.conn.send_channels();
         if (!res) assert_no_mpd_err(conn);
 
         var found = false;
         while (true) {
-            var pair = this.conn.recv_channel_pair();
-            if (pair == null) {
-                assert_no_mpd_err(conn);
+            var pair = conn.recv_pair();
+            if (pair == null)
                 break;
-            }
             found = found || pair.value == channel;
-            this.conn.return_pair(pair);
+            conn.return_pair(pair);
         }
         return found;
     }
-#endif
 }
 
 public static void on_posix_finish(int sig) {
@@ -431,25 +423,33 @@ class Main : Object {
             error("Failed to connect to '%s:%d': %s", host, port, e.message);
         }
 
+        HashTable<string, bool> cmds;
         try {
-            if (!cli.has_sticker()) {
-                error("Mpd didn't have sticker support! This is essentially needed!");
-            }
+            cmds = cli.get_commands();
         } catch (MpcError e) {
-            error("Fail on check sticker support: %s", e.message);
+            error("Fail on lookup avaible commands: %s", e.message);
         }
 
-#if USE_CHANNELS
-        try {
-            if (cli.has_channel("podcastd")) {
-                message("Found another podcastd instance. Quit!");
-                Posix.exit(1);
-            }
-            cli.subscribe("podcastd");
-        } catch (MpcError e) {
-            error("Fail on subscribing channel: %s", e.message);
+        if (!cmds.lookup("sticker")) {
+            error("Mpd didn't have sticker support! This is essentially needed!");
         }
-#endif
+
+        if (cmds.lookup("channels")) {
+            try {
+                if (cli.has_channel("podcastd")) {
+                    message("Found another podcastd instance. Quit!");
+                    Posix.exit(1);
+                }
+            } catch (MpcError e) {
+                error("Fail on subscribing to podcast channel: %s", e.message);
+            }
+            try {
+                cli.subscribe("podcastd");
+            } catch (MpcError e) {
+                error("Fail on subscribing channel: %s", e.message);
+            }
+        }
+
         app_context = loop.get_context();
         update_timer.attach(app_context);
         update_timer.set_callback(update_status);
