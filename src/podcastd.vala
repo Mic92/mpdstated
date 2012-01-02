@@ -266,7 +266,7 @@ class Mpc : Object {
 
         return found;
     }
-
+#if USE_CHANNELS
     public void subscribe(string channel) throws MpcError {
         var res = this.conn.run_subscribe(channel);
         if (!res) assert_no_mpd_err(conn);
@@ -288,7 +288,7 @@ class Mpc : Object {
         }
         return found;
     }
-
+#endif
 }
 
 public static void on_posix_finish(int sig) {
@@ -439,6 +439,7 @@ class Main : Object {
             error("Fail on check sticker support: %s", e.message);
         }
 
+#if USE_CHANNELS
         try {
             if (cli.has_channel("podcastd")) {
                 message("Found another podcastd instance. Quit!");
@@ -448,7 +449,7 @@ class Main : Object {
         } catch (MpcError e) {
             error("Fail on subscribing channel: %s", e.message);
         }
-
+#endif
         app_context = loop.get_context();
         update_timer.attach(app_context);
         update_timer.set_callback(update_status);
