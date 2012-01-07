@@ -9,9 +9,9 @@ How to use
 ==========
 Install podcastd and start it like this:
 
-    $ podcastd --podcast-path=my-podcast-directory
+    $ podcastd --podcast-path=podcast_directory
 
-Replace my-podcast-directory with your directory, where your podcast are located.
+Replace podcast_directory with your directory, where your podcast are located.
 Let's say your mpd music directory is */home/fred/musik* and you store your podcast in */home/fred/musik/podcasts*,
 then your podcast directory is *podcasts*. (sub-directories and sub-sub-directories are allowed too!)
 
