@@ -66,7 +66,7 @@ class Mpc : Object {
 
     private void open_conn() throws MpcError {
         this.conn = new Connection(host, port);
-        assert_no_mpd_err(conn);
+        assert_no_mpd_err(conn, false);
         if (password != null) {
             if (!this.conn.run_password(password)) {
                 throw new MpcError.AUTH("Password refused by server");
@@ -79,7 +79,7 @@ class Mpc : Object {
         this.conn = null;
     }
 
-    private void assert_no_mpd_err(Mpd.Connection conn) throws MpcError {
+    private void assert_no_mpd_err(Mpd.Connection conn, bool signal_on_close = true) throws MpcError {
         var mpd_err = conn.get_error();
         if (mpd_err == Mpd.Error.SUCCESS) return;
 
@@ -107,7 +107,7 @@ class Mpc : Object {
                 err = new MpcError.UNKNOWN(@"Failed to translate error code '$err_code': '$msg'");
                 break;
         };
-        if (!conn.clear_error()) on_close();
+        if (!conn.clear_error() && signal_on_close) on_close();
 
         throw err;
     }
@@ -117,7 +117,7 @@ class Mpc : Object {
         this.keep_idle = true;
         this.idle_mask = mask;
         this.idle_conn = new Connection(this.host, this.port);
-        assert_no_mpd_err(this.idle_conn);
+        assert_no_mpd_err(this.idle_conn, false);
         var chan = new IOChannel.unix_new(this.idle_conn.fd);
         chan.add_watch(IOCondition.ERR | IOCondition.HUP |
                        IOCondition.IN, check_idle);
@@ -135,6 +135,7 @@ class Mpc : Object {
                 assert_no_mpd_err(this.idle_conn);
             } catch (MpcError e) {
                 message("error while idleing: %s", e.message);
+                return false;
             }
         } else {
             debug("handle event");
@@ -148,6 +149,7 @@ class Mpc : Object {
                 assert_no_mpd_err(this.idle_conn);
             } catch (MpcError e) {
                 message("error while idleing: %s", e.message);
+                return false;
             }
         }
         return true;
@@ -160,6 +162,7 @@ class Mpc : Object {
     }
 
     public bool reconnect() {
+        debug("reconnect");
         try {
             this.open_conn();
         } catch (MpcError e) {
