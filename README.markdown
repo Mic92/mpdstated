@@ -21,7 +21,7 @@ For more options see:
 
     $ podcastd --help
 
-How that works
+How it works
 ==============
 podcastd uses this awesome sticker feature introduced in mpd v0.15 to store the recent position server side.
 (that allows to run podcastd from a different machine!)
