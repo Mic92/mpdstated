@@ -393,6 +393,11 @@ class Main : Object {
     public static int main(string[] args) {
         var loop = new MainLoop();
         var update_timer = new TimeoutSource.seconds(1);
+        HashTable<string, bool> mpd_cmds = null;
+
+        app_context = loop.get_context();
+        update_timer.attach(app_context);
+        update_timer.set_callback(update_status);
 
         try {
             var opt = new OptionContext("- make mpd to resume podcasts, where your stopped");
@@ -403,7 +408,7 @@ class Main : Object {
             stderr.printf("Error: %s\n", e.message);
             stderr.printf("Run '%s --help' to see a full list of available "+
                     "options\n", args[0]);
-            return 1;
+            return Posix.EXIT_FAILURE;
         }
         // default values
         host = host == null ? "localhost" : host;
@@ -418,52 +423,60 @@ class Main : Object {
             Log.set_handler(null, log_mask, Log.default_handler);
         }
 
-        message("Successfully connected to %s:%d", host, port);
-        try {
-            cli = new Mpc(host, port, password);
-        } catch (MpcError e) {
-            // TODO retry it instead
-            error("Failed to connect to '%s:%d': %s", host, port, e.message);
-        }
-
-        HashTable<string, bool> cmds;
-        try {
-            cmds = cli.get_commands();
-        } catch (MpcError e) {
-            error("Fail on lookup avaible commands: %s", e.message);
-        }
-
-        if (!cmds.lookup("sticker")) {
-            error("Mpd didn't have sticker support! This is essentially needed!");
-        }
-
-        if (cmds.lookup("channels")) {
+        for (var is_online = false; !is_online; Posix.sleep(10)) {
             try {
-                if (cli.has_channel("podcastd")) {
-                    message("Found another podcastd instance. Quit!");
-                    Posix.exit(1);
+                cli = new Mpc(host, port, password);
+                is_online = true;
+            } catch (MpcError e) {
+                warning("Failed to connect to '%s:%d': %s", host, port, e.message);
+                is_online = false;
+                continue;
+            }
+            message("Successfully connected to %s:%d", host, port);
+
+            try {
+                mpd_cmds = cli.get_commands();
+            } catch (MpcError e) {
+                warning("Fail on lookup avaible commands: %s", e.message);
+                is_online = false;
+                continue;
+            }
+
+            if (!mpd_cmds.lookup("sticker")) {
+                warning("Mpd didn't have sticker support! This is essentially needed!");
+                Posix.exit(Posix.EXIT_FAILURE);
+            }
+
+            if (mpd_cmds.lookup("channels")) {
+                try {
+                    if (cli.has_channel("podcastd")) {
+                        message("Found another podcastd instance. Quit!");
+                        Posix.exit(Posix.EXIT_SUCCESS);
+                    }
+                } catch (MpcError e) {
+                    warning("Fail on subscribing to podcast channel: %s", e.message);
+                    is_online = false;
+                    continue;
                 }
-            } catch (MpcError e) {
-                error("Fail on subscribing to podcast channel: %s", e.message);
+                try {
+                    cli.subscribe("podcastd");
+                } catch (MpcError e) {
+                    warning("Fail on subscribing channel: %s", e.message);
+                    is_online = false;
+                    continue;
+                }
             }
+
+            cli.on_idle.connect(on_mpd_idle);
+            cli.on_close.connect(on_mpd_close);
+
             try {
-                cli.subscribe("podcastd");
+                cli.open_idle(Mpd.Idle.PLAYER);
             } catch (MpcError e) {
-                error("Fail on subscribing channel: %s", e.message);
+                warning("Failed to going idle: %s", e.message);
+                is_online = false;
+                continue;
             }
-        }
-
-        app_context = loop.get_context();
-        update_timer.attach(app_context);
-        update_timer.set_callback(update_status);
-
-        cli.on_idle.connect(on_mpd_idle);
-        cli.on_close.connect(on_mpd_close);
-
-        try {
-            cli.open_idle(Mpd.Idle.PLAYER);
-        } catch (MpcError e) {
-            error("Failed to going idle: %s", e.message);
         }
 
         Posix.signal(Posix.SIGINT, on_posix_finish);
@@ -476,10 +489,10 @@ class Main : Object {
                 warning("Failed to fork into background\n");
             } else if (pid != 0) {
                 message("fork into background\n");
-                Posix.exit(0);
+                Posix.exit(Posix.EXIT_SUCCESS);
             }
         }
         loop.run();
-        return 0;
+        return Posix.EXIT_SUCCESS;
     }
 }
