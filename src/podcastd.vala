@@ -231,7 +231,7 @@ class Mpc : Object {
     }
 
     public void set_elapsed_time(string uri, uint sec) throws MpcError {
-        debug("set elapsed time on %s.", uri);
+        debug("set elapsed time on '%s'.", uri);
         var res = this.conn.run_sticker_set("song", uri, "elapsed_time", sec.to_string());
 
         if (!res) {
