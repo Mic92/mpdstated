@@ -477,6 +477,7 @@ class Main : Object {
                 is_online = false;
                 continue;
             }
+            break;
         }
 
         Posix.signal(Posix.SIGINT, on_posix_finish);
