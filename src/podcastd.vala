@@ -368,8 +368,8 @@ class Main : Object {
         try {
             var song = cli.get_current_song();
             if (song == null) return true;
-            var status = cli.get_status();
             if (song.uri.has_prefix(podcast_path)) {
+                var status = cli.get_status();
                 if (lastsong_uri == null || song.uri != lastsong_uri) {
                     lastsong_uri = song.uri;
                 }
