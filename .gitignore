@@ -1,0 +1,9 @@
+# cmake related files
+/CMakeCache.txt
+/CMakeFiles
+/_CPack_Packages
+/cmake_install.cmake
+/Makefile
+
+# generated c-files
+src/*.c
