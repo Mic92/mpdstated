@@ -63,3 +63,22 @@ target_link_libraries(podcastd
         )
 install(TARGETS podcastd
         RUNTIME DESTINATION bin)
+
+# Packages
+set(CPACK_PACKAGE_NAME "podcastd")
+set(CPACK_PACKAGE_VERSION 0.2)
+set(CPACK_PACKAGE_CONTACT "jthalheim@gmail.com")
+set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Auto restore recent position for each podcast in mpd")
+set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
+SET(CPACK_GENERATOR "DEB;RPM")
+
+set(LICENCSE )
+# Debian specific
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libmpdclient2 (>= 2.5), libglib2.0, libc6")
+set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
+
+# RPM specific
+set(CPACK_RPM_PACKAGE_LICENSE "GPL")
+set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
+include(CPack)
