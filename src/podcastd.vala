@@ -296,8 +296,6 @@ public static void on_posix_finish(int sig) {
 }
 
 class Main : Object {
-    public static MainContext app_context;
-
     // user_options
     private static string host = null;
     private static int port = 6600;
@@ -324,8 +322,11 @@ class Main : Object {
 
     // Internal data
     private static Mpc cli;
+    // state for the idle handler
     private static string lastsong_uri;
     private static uint lastsong_pos;
+    private static Mpd.State lastsong_state;
+    private static Timer lastsong_timer;
 
     public static bool on_app_exit() {
         if (lastsong_uri == null) return true;
@@ -344,9 +345,14 @@ class Main : Object {
         try {
             var song = cli.get_current_song();
             if (song == null) return;
+            var status = cli.get_status();
+
             if (lastsong_uri != null && song.uri != lastsong_uri) {
                 if (lastsong_uri.has_prefix(podcast_path)) {
                     debug("store podcast state");
+                    if (lastsong_state == Mpd.State.PLAY) {
+                        lastsong_pos += (uint) lastsong_timer.elapsed();
+                    }
                     cli.set_elapsed_time(lastsong_uri, lastsong_pos);
                 }
                 if (song.uri.has_prefix(podcast_path)) {
@@ -358,28 +364,14 @@ class Main : Object {
                     }
                 }
             }
-            lastsong_uri = song.uri.dup();
+
+            lastsong_uri   = song.uri.dup();
+            lastsong_pos   = status.get_elapsed_time();
+            lastsong_state = status.get_state();
+            lastsong_timer.start();
         } catch(MpcError e) {
             warning("Error while dispatching idle event: %s", e.message);
         }
-    }
-
-    public static bool update_status() {
-        try {
-            var song = cli.get_current_song();
-            if (song == null) return true;
-            if (song.uri.has_prefix(podcast_path)) {
-                var status = cli.get_status();
-                if (lastsong_uri == null || song.uri != lastsong_uri) {
-                    lastsong_uri = song.uri;
-                }
-                lastsong_pos = status.get_elapsed_time();
-                debug("get podcast position: %us", lastsong_pos);
-            }
-        } catch (MpcError e) {
-            warning("Error while getting song updates: %s", e.message);
-        }
-        return true;
     }
 
     public static void on_mpd_close() {
@@ -392,12 +384,7 @@ class Main : Object {
 
     public static int main(string[] args) {
         var loop = new MainLoop();
-        var update_timer = new TimeoutSource.seconds(1);
         HashTable<string, bool> mpd_cmds = null;
-
-        app_context = loop.get_context();
-        update_timer.attach(app_context);
-        update_timer.set_callback(update_status);
 
         try {
             var opt = new OptionContext("- make mpd to resume podcasts, where your stopped");
@@ -423,6 +410,8 @@ class Main : Object {
             Log.set_handler(null, log_mask, Log.default_handler);
         }
 
+        // if connection fails the first time, retry it.
+        // maybe mpd is not ready yet (on startup)
         for (var is_online = false; !is_online; Posix.sleep(10)) {
             try {
                 cli = new Mpc(host, port, password);
@@ -469,6 +458,9 @@ class Main : Object {
 
             cli.on_idle.connect(on_mpd_idle);
             cli.on_close.connect(on_mpd_close);
+            // set initial state for idle handler
+            lastsong_timer = new Timer();
+            on_mpd_idle(0);
 
             try {
                 cli.open_idle(Mpd.Idle.PLAYER);
