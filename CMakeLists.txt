@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 2.6)
 # Location where cmake first looks for modules.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/vala)
 
-
 ################################################################
 # Configure and find libraries
 ################################################################
@@ -55,6 +54,7 @@ vala_precompile(VALA_C
                 --vapidir=${CMAKE_SOURCE_DIR}/vapi
        )
 
+
 add_executable(podcastd ${VALA_C})
 target_link_libraries(podcastd
         ${GLIB_LIBRARIES}
@@ -83,5 +83,6 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE ${GITHUB_PAGE})
 # RPM specific
 set(CPACK_RPM_PACKAGE_LICENSE "GPLv3")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
+set(CPACK_RPM_PACKAGE_REQUIRES "libmpdclient >= 2.5, glib2, glibc")
 set(CPACK_RPM_PACKAGE_URL ${GITHUB_PAGE})
 include(CPack)
