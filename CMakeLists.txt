@@ -21,6 +21,7 @@ pkg_check_modules(PODCASTD_DEPENDS REQUIRED
         glib-2.0
         gobject-2.0
         libmpdclient>=2.1)
+pkg_check_modules(LIBMPDCLIENT_WITH_C2C QUIET libmpdclient>=2.5)
 
 add_definitions(${PODCASTD_DEPENDS_CFLAGS})
 
@@ -30,6 +31,11 @@ link_directories(${PODCASTD_DEPENDS_LIBRARY_DIRS})
 
 include_directories(${PODCASTD_DEPENDS_INCLUDE_DIRS})
 
+set(VALA_DEFINE_FLAGS "")
+if (NOT LIBMPDCLIENT_WITH_C2C_FOUND)
+        set(VALA_DEFINE_FLAGS "-D NO_CLIENT_TO_CLIENT")
+endif(NOT LIBMPDCLIENT_WITH_C2C_FOUND)
+
 vala_precompile(VALA_C
                 src/podcastd.vala
         PACKAGES
@@ -37,6 +43,7 @@ vala_precompile(VALA_C
                 posix
         OPTIONS
                 --vapidir=${CMAKE_SOURCE_DIR}/vapi
+                ${VALA_DEFINE_FLAGS}
        )
 
 
@@ -56,13 +63,15 @@ set(CPACK_PACKAGE_EXECUTABLES "podcastd")
 
 set(GITHUB_PAGE "https://github.com/Mic92/podcastd")
 # Debian specific
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libmpdclient2 (>= 2.5), libglib2.0, libc6")
+#set(CPACK_DEBIAN_PACKAGE_DEBUG on)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libmpdclient2 (>= 2.1), libglib2.0, libc6")
 set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
+#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS on)
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE ${GITHUB_PAGE})
 
 # RPM specific
 set(CPACK_RPM_PACKAGE_LICENSE "GPLv3")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
-set(CPACK_RPM_PACKAGE_REQUIRES "libmpdclient >= 2.5, glib2, glibc")
+set(CPACK_RPM_PACKAGE_REQUIRES "libmpdclient >= 2.1, glib2, glibc")
 set(CPACK_RPM_PACKAGE_URL ${GITHUB_PAGE})
 include(CPack)

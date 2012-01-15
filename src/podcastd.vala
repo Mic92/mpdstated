@@ -243,14 +243,35 @@ class Mpc : Object {
 
         return table;
     }
+// Client-To-Client protocol was introduced in libmpdclient v2.5
+// debian and ubuntu currently only have v2.3
+#if NO_CLIENT_TO_CLIENT
+    private bool run_subscribe(string channel) {
+        return this.conn.send_command("subscribe", channel, null) &&
+            this.conn.response_finish();
+    }
+
+    private bool send_channels() {
+        return this.conn.send_command("channels", null);
+    }
+#endif
+
     public void subscribe(string channel) throws MpcError {
+#if NO_CLIENT_TO_CLIENT
+        var res = this.run_subscribe(channel);
+#else
         var res = this.conn.run_subscribe(channel);
+#endif
         if (!res) assert_no_mpd_err(conn);
     }
 
     public bool has_channel(string channel) throws MpcError {
         debug("check channel.");
+#if NO_CLIENT_TO_CLIENT
+        var res = this.send_channels();
+#else
         var res = this.conn.send_channels();
+#endif
         if (!res) assert_no_mpd_err(conn);
 
         var found = false;
