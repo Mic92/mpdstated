@@ -74,12 +74,14 @@ set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
 set(CPACK_GENERATOR "DEB;RPM")
 set(CPACK_PACKAGE_EXECUTABLES "podcastd")
 
-set(LICENCSE )
+set(GITHUB_PAGE "https://github.com/Mic92/podcastd")
 # Debian specific
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libmpdclient2 (>= 2.5), libglib2.0, libc6")
 set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE ${GITHUB_PAGE})
 
 # RPM specific
 set(CPACK_RPM_PACKAGE_LICENSE "GPL")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
+set(CPACK_RPM_PACKAGE_URL ${GITHUB_PAGE})
 include(CPack)
