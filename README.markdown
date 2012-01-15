@@ -23,8 +23,11 @@ For more options see:
 
 How it works
 ==============
-podcastd uses this awesome sticker feature introduced in mpd v0.15 to store the recent position server side.
+podcastd uses sticker, introduced in mpd v0.15, to store the recent position server side.
 (that allows to run podcastd from a different machine!)
+
+To detect multiple instances of podcastd the client-to-client protocol is needed.
+This feature is currently only avaible in the development version of mpd.
 
 How to build
 ============
