@@ -11,7 +11,7 @@ Install podcastd and start it like this:
 
     $ podcastd --podcast-path=podcast_directory
 
-Replace podcast_directory with your directory, where your podcast are located.
+Replace podcast\_directory with your directory, where your podcast are located.
 Let's say your mpd music directory is */home/fred/musik* and you store your podcast in */home/fred/musik/podcasts*,
 then your podcast directory is *podcasts*. (sub-directories and sub-sub-directories are allowed too!)
 
