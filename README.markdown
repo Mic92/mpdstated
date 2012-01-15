@@ -34,6 +34,10 @@ install the following tools/libraries:
   - vala (implies glib and gobject)
   - cmake
 
+Here a oneliner to install the dependencies under Debian/Ubuntu:
+
+    apt-get install valac libmpdclient-dev cmake
+
 Clone the repository and cd into it:
 
     git clone https://github.com/Mic92/podcastd.git
@@ -56,8 +60,17 @@ If you want to install it to /usr/bin use the following commands.
 How to package
 ==============
 
-Currently there are no deb/rpm-packages.
-I would really appreciate, if someone with a launchpad account
-or opensuse build-service account could do this.
+archlinux
+---------
+Use the PGKBUILD included in the source
 
-For archlinux exists a PKGBUILD, which you could use.
+DEB and RPM
+------------
+There is experimental support to provide DEB and RPM via cmake.
+After building the binary just run:
+
+    make package
+
+The dependecies are specified in CmakeLists.txt.
+
+So please provide me patches, if something is missing.
