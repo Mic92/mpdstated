@@ -71,7 +71,8 @@ set(CPACK_PACKAGE_CONTACT "jthalheim@gmail.com")
 set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Auto restore recent position for each podcast in mpd")
 set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
-SET(CPACK_GENERATOR "DEB;RPM")
+set(CPACK_GENERATOR "DEB;RPM")
+set(CPACK_PACKAGE_EXECUTABLES "podcastd")
 
 set(LICENCSE )
 # Debian specific
