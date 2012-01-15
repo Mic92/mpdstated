@@ -34,9 +34,13 @@ install the following tools/libraries:
   - vala (implies glib and gobject)
   - cmake
 
-Here a oneliner to install the dependencies under Debian/Ubuntu:
+Here a oneliner to install the dependencies under Debian/Ubuntu/Mint:
 
-    apt-get install valac libmpdclient-dev cmake
+    apt-get install valac cmake libglib2.0-dev libmpdclient-dev
+
+On Fedora/Centos/Opensuse the following package are needed:
+
+    vala glib2-devel libmpdclient-devel cmake
 
 Clone the repository and cd into it:
 
