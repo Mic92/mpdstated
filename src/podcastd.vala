@@ -110,20 +110,22 @@ class Mpc : Object {
         debug("do idle.");
 
         var events = this.idle_conn.recv_idle(false);
-
         debug("idle event: %d", events);
-        try {
-            assert_no_mpd_err(this.idle_conn);
-        } catch (MpcError e) {
-            // TODO show error, before trigger on_close()!
-            message("error while idleing: %s", e.message);
-            return false;
+
+        if (events == 0) {
+            try {
+                assert_no_mpd_err(this.idle_conn);
+            } catch (MpcError e) {
+                // TODO show error, before trigger on_close()!
+                message("error while idleing: %s", e.message);
+                return false;
+            }
         }
         on_idle(events);
 
         var res = this.idle_conn.send_idle_mask(this.idle_mask);
 
-        if (res) {
+        if (!res) {
             try {
                 assert_no_mpd_err(this.idle_conn);
             } catch (MpcError e) {
