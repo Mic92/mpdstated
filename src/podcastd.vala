@@ -356,7 +356,14 @@ class Main : Object {
                     if (lastsong_state == Mpd.State.PLAY) {
                         lastsong_pos += (uint) lastsong_timer.elapsed();
                     }
-                    cli.set_elapsed_time(lastsong_uri, lastsong_pos);
+                    try {
+                        cli.set_elapsed_time(lastsong_uri, lastsong_pos);
+                    } catch(MpcError e) {
+                        // If the song is deleted before its time is saved, just go ahead.
+                        if (!(e is MpcError.SERVER)) {
+                            throw e;
+                        }
+                    }
                 }
                 if (song.uri.has_prefix(podcast_path)) {
                     debug("restore podcast state");
