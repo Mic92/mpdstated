@@ -1,15 +1,15 @@
-pkgname=podcastd-git
-pkgver=20111230
+pkgname=mpdstated-git
+pkgver=20120114
 pkgrel=1
-pkgdesc="Make mpd remember, where you stop your podcast"
-url="https://github.com/Mic92/podcastd"
+pkgdesc="Automaticly restores the last position of each podcastd/audiobook in mpd"
+url="https://github.com/Mic92/mpdstated"
 license=('GPL')
 depends=('glib2' 'libmpdclient' 'cmake')
 makedepends=('git' 'vala')
 arch=('i686' 'x86_64')
 
-_gitroot="https://Mic92@github.com/Mic92/podcastd.git"
-_gitname="podcastd"
+_gitroot="https://Mic92@github.com/Mic92/mpdstated.git"
+_gitname="mpdstated"
 
 build() {
     cd $srcdir

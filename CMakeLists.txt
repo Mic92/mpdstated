@@ -1,7 +1,7 @@
 #####################
-# Project podcastd
+# Project mpdstated
 #####################
-project(podcastd C)
+project(mpdstated C)
 
 cmake_minimum_required(VERSION 2.6)
 
@@ -17,19 +17,19 @@ find_package(Vala REQUIRED)
 include(${VALA_USE_FILE})
 
 find_package(PkgConfig)
-pkg_check_modules(PODCASTD_DEPENDS REQUIRED
+pkg_check_modules(MPDSTATED_DEPENDS REQUIRED
         glib-2.0
         gobject-2.0
         libmpdclient>=2.1)
 pkg_check_modules(LIBMPDCLIENT_WITH_C2C QUIET libmpdclient>=2.5)
 
-add_definitions(${PODCASTD_DEPENDS_CFLAGS})
+add_definitions(${MPDSTATED_DEPENDS_CFLAGS})
 
-link_libraries(${PODCASTD_DEPENDS_LIBRARIES})
+link_libraries(${MPDSTATED_DEPENDS_LIBRARIES})
 
-link_directories(${PODCASTD_DEPENDS_LIBRARY_DIRS})
+link_directories(${MPDSTATED_DEPENDS_LIBRARY_DIRS})
 
-include_directories(${PODCASTD_DEPENDS_INCLUDE_DIRS})
+include_directories(${MPDSTATED_DEPENDS_INCLUDE_DIRS})
 
 set(VALA_DEFINE_FLAGS "")
 if (NOT LIBMPDCLIENT_WITH_C2C_FOUND)
@@ -37,7 +37,7 @@ if (NOT LIBMPDCLIENT_WITH_C2C_FOUND)
 endif(NOT LIBMPDCLIENT_WITH_C2C_FOUND)
 
 vala_precompile(VALA_C
-                src/podcastd.vala
+                src/mpdstated.vala
         PACKAGES
                 libmpdclient
                 posix
@@ -46,22 +46,21 @@ vala_precompile(VALA_C
                 ${VALA_DEFINE_FLAGS}
        )
 
-
-add_executable(podcastd ${VALA_C})
-install(TARGETS podcastd
+add_executable(mpdstated ${VALA_C})
+install(TARGETS mpdstated
         RUNTIME DESTINATION bin)
 
 # Packages
-set(CPACK_PACKAGE_NAME "podcastd")
+set(CPACK_PACKAGE_NAME "mpdstated")
 set(CPACK_PACKAGE_VERSION 0.2)
 set(CPACK_PACKAGE_CONTACT "jthalheim@gmail.com")
 set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Auto restore recent position for each podcast in mpd")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Auto restore recent position for each track in mpd")
 set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
 set(CPACK_GENERATOR "DEB;RPM")
-set(CPACK_PACKAGE_EXECUTABLES "podcastd")
+set(CPACK_PACKAGE_EXECUTABLES "mpdstated")
 
-set(GITHUB_PAGE "https://github.com/Mic92/podcastd")
+set(GITHUB_PAGE "https://github.com/Mic92/mpdstated")
 # Debian specific
 #set(CPACK_DEBIAN_PACKAGE_DEBUG on)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libmpdclient2 (>= 2.1), libglib2.0, libc6")

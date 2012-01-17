@@ -1,32 +1,32 @@
-Podcastd - a podcast tracker for MPD
+Mpdstated - a state tracker for MPD
 ====================================
 Are you tired of loosing your recent position in your podcast/audiobook,
 because you switched to a different track?
 
-This was my motivation to write podcastd: It automaticly restore the position you stopped.
+This was my motivation to write mpdstated: It automaticly restore the position you stopped.
 
 How to use
 ==========
-Install podcastd and start it like this:
+Install mpdstated and start it like this:
 
-    $ podcastd --podcast-path=podcast_directory
+    $ mpdstated --track-path=watched_directory
 
-Replace podcast\_directory with your directory, where your podcast are located.
+Replace watched\_directory with your directory, which should be observed.
 Let's say your mpd music directory is */home/fred/musik* and you store your podcast in */home/fred/musik/podcasts*,
-then your podcast directory is *podcasts*. (sub-directories and sub-sub-directories are allowed too!)
+then your wanted directory is *podcasts*. (sub-directories and sub-sub-directories are allowed too!)
 
 That's all.
 
 For more options see:
 
-    $ podcastd --help
+    $ mpdstated --help
 
 How it works
 ==============
-podcastd uses sticker, introduced in mpd v0.15, to store the recent position server side.
-(that allows to run podcastd from a different machine!)
+mpdstated uses sticker, introduced in mpd v0.15, to store the recent position server side.
+(that allows to run mpdstated from a different machine!)
 
-To detect multiple instances of podcastd the client-to-client protocol is needed.
+To detect multiple instances of mpdstated the client-to-client protocol is needed.
 This feature is currently only avaible in the development version of mpd.
 
 How to build
@@ -47,15 +47,15 @@ On Fedora/Centos/Opensuse the following package are needed:
 
 Clone the repository and cd into it:
 
-    git clone https://github.com/Mic92/podcastd.git
-    cd podcastd
+    git clone https://github.com/Mic92/mpdstated.git
+    cd mpdstated
 
 Then just run the following commands:
 
     cmake .
     make
 
-If everthing works you get a single binary named podcastd,
+If everthing works you get a single binary named mpdstated,
 which could be copied in $HOME/bin for example.
 
 If you want to install it to /usr/bin use the following commands.
@@ -67,7 +67,7 @@ If you want to install it to /usr/bin use the following commands.
 How to package
 ==============
 
-archlinux
+Archlinux
 ---------
 Use the PGKBUILD included in the source
 
