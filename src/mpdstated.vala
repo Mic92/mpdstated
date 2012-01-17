@@ -303,7 +303,7 @@ class Main : Object {
     private static string host = null;
     private static int port = 6600;
     private static string password = null;
-    private static string podcast_path = null;
+    private static string track_path = null;
     private static bool verbose = false;
     private static bool no_daemon = false;
 
@@ -318,7 +318,7 @@ class Main : Object {
             "verbose logging [off]", null },
         { "no-deamon", '\0', 0, OptionArg.NONE, ref no_daemon,
             "don't detach from console [off]", null },
-        { "podcast-path", 'd', 0, OptionArg.STRING, ref podcast_path,
+        { "track-path", 'd', 0, OptionArg.STRING, ref track_path,
             "tracked path relative to your music path [podcasts]", "PATH" },
         { null }
     };
@@ -333,7 +333,7 @@ class Main : Object {
 
     public static bool on_app_exit() {
         if (lastsong_uri == null) return true;
-        if (lastsong_uri.has_prefix(podcast_path)) {
+        if (lastsong_uri.has_prefix(track_path)) {
             try {
                 cli.set_elapsed_time(lastsong_uri, lastsong_pos);
             } catch (MpcError e) {
@@ -351,8 +351,8 @@ class Main : Object {
             var status = cli.get_status();
 
             if (lastsong_uri != null && song.uri != lastsong_uri) {
-                if (lastsong_uri.has_prefix(podcast_path)) {
-                    debug("store podcast state");
+                if (lastsong_uri.has_prefix(track_path)) {
+                    debug("store track state");
                     if (lastsong_state == Mpd.State.PLAY) {
                         lastsong_pos += (uint) lastsong_timer.elapsed();
                     }
@@ -365,8 +365,8 @@ class Main : Object {
                         }
                     }
                 }
-                if (song.uri.has_prefix(podcast_path)) {
-                    debug("restore podcast state");
+                if (song.uri.has_prefix(track_path)) {
+                    debug("restore track state");
                     var pos = cli.get_elapsed_time(song.uri);
                     if (pos != 0) {
                         cli.seek_song(song, pos);
@@ -397,7 +397,7 @@ class Main : Object {
         HashTable<string, bool> mpd_cmds = null;
 
         try {
-            var opt = new OptionContext("- make mpd to resume podcasts, where your stopped");
+            var opt = new OptionContext("- Auto restore recent position for each track in mpd");
             opt.set_help_enabled(true);
             opt.add_main_entries(options, null);
             opt.parse(ref args);
@@ -409,7 +409,7 @@ class Main : Object {
         }
         // default values
         host = host == null ? "localhost" : host;
-        podcast_path = podcast_path == null ? "podcasts" : host;
+        track_path = track_path == null ? "podcasts" : host;
 
         if (!verbose) {
             // clear loghandler;
@@ -448,17 +448,17 @@ class Main : Object {
 
             if (mpd_cmds.lookup("channels")) {
                 try {
-                    if (cli.has_channel("podcastd")) {
-                        message("Found another podcastd instance. Quit!");
+                    if (cli.has_channel("mpdstated")) {
+                        message("Found another mpdstated instance. Quit!");
                         Posix.exit(Posix.EXIT_SUCCESS);
                     }
                 } catch (MpcError e) {
-                    warning("Fail on subscribing to podcast channel: %s", e.message);
+                    warning("Fail on subscribing to mpdstated channel: %s", e.message);
                     is_online = false;
                     continue;
                 }
                 try {
-                    cli.subscribe("podcastd");
+                    cli.subscribe("mpdstated");
                 } catch (MpcError e) {
                     warning("Fail on subscribing channel: %s", e.message);
                     is_online = false;
