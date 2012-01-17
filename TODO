@@ -4,10 +4,10 @@ add Keyfile based config
 # later features
 gui-based configuration
 freedesktop compliant autostart
-deb and rpm files (using opensuse buildservice?)
 synching with other distance (shared json file?)
 
 #done
 add optionparser
 add README
 add install instruction
+deb and rpm files
