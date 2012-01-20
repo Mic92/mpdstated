@@ -43,7 +43,6 @@ vala_precompile(VALA_C
                 posix
         OPTIONS
                 --vapidir=${CMAKE_SOURCE_DIR}/vapi
-                ${VALA_DEFINE_FLAGS}
         DEFINITIONS
                 ${DEF_NO_CLIENT_TO_CLIENT}
        )
