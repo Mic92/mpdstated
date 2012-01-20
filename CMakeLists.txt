@@ -53,7 +53,7 @@ install(TARGETS mpdstated
 
 # Packages
 set(CPACK_PACKAGE_NAME "mpdstated")
-set(CPACK_PACKAGE_VERSION 0.2)
+set(CPACK_PACKAGE_VERSION 0.3)
 set(CPACK_PACKAGE_CONTACT "jthalheim@gmail.com")
 set(CPACK_RESOURCE_FILE_LICENSE "LICENSE")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Auto restore recent position for each track in mpd")
