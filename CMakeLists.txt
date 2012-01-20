@@ -31,9 +31,9 @@ link_directories(${MPDSTATED_DEPENDS_LIBRARY_DIRS})
 
 include_directories(${MPDSTATED_DEPENDS_INCLUDE_DIRS})
 
-set(VALA_DEFINE_FLAGS "")
+set(DEF_NO_CLIENT_TO_CLIENT "")
 if (NOT LIBMPDCLIENT_WITH_C2C_FOUND)
-        set(VALA_DEFINE_FLAGS "-D NO_CLIENT_TO_CLIENT")
+        set(DEF_NO_CLIENT_TO_CLIENT "NO_CLIENT_TO_CLIENT")
 endif(NOT LIBMPDCLIENT_WITH_C2C_FOUND)
 
 vala_precompile(VALA_C
@@ -44,6 +44,8 @@ vala_precompile(VALA_C
         OPTIONS
                 --vapidir=${CMAKE_SOURCE_DIR}/vapi
                 ${VALA_DEFINE_FLAGS}
+        DEFINITIONS
+                ${DEF_NO_CLIENT_TO_CLIENT}
        )
 
 add_executable(mpdstated ${VALA_C})
