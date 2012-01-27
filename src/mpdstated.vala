@@ -254,8 +254,7 @@ class Mpc : Object {
     }
 
     private bool send_channels() {
-        return this.conn.send_command("channels", null) &&
-            this.conn.response_finish();
+        return this.conn.send_command("channels", null);
     }
 #endif
 
