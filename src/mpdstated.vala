@@ -184,7 +184,7 @@ class Mpc : Object {
     }
 
     public uint get_elapsed_time(string uri) throws MpcError {
-        debug("get elapsed time.");
+        debug("get elapsed time '%s'.", uri);
         var res = this.conn.send_sticker_get("song", uri, "elapsed_time");
 
         if (!res) {
