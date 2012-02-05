@@ -114,10 +114,10 @@ class Mpc : Object {
 
         if (events == 0) {
             try {
-                assert_no_mpd_err(this.idle_conn);
+                assert_no_mpd_err(this.idle_conn, false);
             } catch (MpcError e) {
-                // TODO show error, before trigger on_close()!
                 message("error while idleing: %s", e.message);
+                if (!this.idle_conn.clear_error()) on_close();
                 return false;
             }
         }
@@ -127,9 +127,10 @@ class Mpc : Object {
 
         if (!res) {
             try {
-                assert_no_mpd_err(this.idle_conn);
+                assert_no_mpd_err(this.idle_conn, false);
             } catch (MpcError e) {
                 message("error while idleing: %s", e.message);
+                if (!this.idle_conn.clear_error()) on_close();
                 return false;
             }
         }
