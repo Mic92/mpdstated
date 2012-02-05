@@ -408,8 +408,8 @@ class Main : Object {
             return Posix.EXIT_FAILURE;
         }
         // default values
-        host = host == null ? "localhost" : host;
-        track_path = track_path == null ? "podcasts" : host;
+        if (host == null) host = "localhost";
+        if (track_path == null) track_path = "podcasts";
 
         if (!verbose) {
             // clear loghandler;
