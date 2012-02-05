@@ -386,8 +386,8 @@ class Main : Object {
 
     public static void on_mpd_close() {
         while(!cli.reconnect()) {
-            stderr.printf("Fails to reconnet try it again in 10 sec!");
-            Posix.sleep(10);
+            stderr.printf("Fails to reconnet try it again in 5 sec!");
+            Posix.sleep(5);
         }
         message("Reconnect successfully!");
     }
