@@ -315,7 +315,7 @@ class Main : Object {
             "address used to connect []", "SECRET" },
         { "verbose", 'v', 0, OptionArg.NONE, ref verbose,
             "verbose logging [off]", null },
-        { "no-deamon", '\0', 0, OptionArg.NONE, ref no_daemon,
+        { "no-daemon", '\0', 0, OptionArg.NONE, ref no_daemon,
             "don't detach from console [off]", null },
         { "track-path", 'd', 0, OptionArg.STRING, ref track_path,
             "tracked path relative to your music path [podcasts]", "PATH" },
