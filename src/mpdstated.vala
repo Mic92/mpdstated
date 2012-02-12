@@ -67,11 +67,16 @@ class Mpc : Object {
 
         string msg = conn.get_error_message();
         MpcError err;
+
         switch(mpd_err) {
+            case Mpd.Error.SUCCESS:
+                return;
             case Mpd.Error.ARGUMENT:
                 err = new MpcError.ARGUMENT(msg); break;
             case Mpd.Error.OOM:
                 err = new MpcError.MEMORY(msg); break;
+            case Mpd.Error.CLOSED:
+                err = new MpcError.CLOSED(msg); break;
             case Mpd.Error.MALFORMED:
                 err = new MpcError.MALFORMED(msg); break;
             case Mpd.Error.RESOLVER:
