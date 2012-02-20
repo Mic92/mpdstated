@@ -49,6 +49,9 @@ class Mpc : Object {
     private void open_conn() throws MpcError {
         this.conn = new Connection(host, port);
         assert_no_mpd_err(conn, false);
+        int on = 1;
+        Posix.socklen_t len = (Posix.socklen_t)sizeof(int);
+        Posix.setsockopt(conn.fd, Linux.Socket.SOL_SOCKET, Linux.Socket.SO_KEEPALIVE, &on, len);
         if (password != null) {
             if (!this.conn.run_password(password)) {
                 throw new MpcError.AUTH("Password refused by server");

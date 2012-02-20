@@ -41,6 +41,7 @@ vala_precompile(VALA_C
         PACKAGES
                 libmpdclient
                 posix
+                linux
         OPTIONS
                 --vapidir=${CMAKE_SOURCE_DIR}/vapi
         DEFINITIONS
