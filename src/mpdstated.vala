@@ -336,6 +336,7 @@ class Main : Object {
     // state for the idle handler
     private static string lastsong_uri;
     private static uint lastsong_pos;
+    private static uint lastsong_total;
     private static Mpd.State lastsong_state;
     private static Timer lastsong_timer;
 
@@ -364,13 +365,19 @@ class Main : Object {
                     if (lastsong_state == Mpd.State.PLAY) {
                         lastsong_pos += (uint) lastsong_timer.elapsed();
                     }
-                    try {
-                        cli.set_elapsed_time(lastsong_uri, lastsong_pos);
-                    } catch(MpcError e) {
-                        // If the song is deleted before its time is saved, just go ahead.
-                        if (!(e is MpcError.SERVER)) {
-                            throw e;
+                    if (lastsong_pos < lastsong_total) {
+                        try {
+                            cli.set_elapsed_time(lastsong_uri, lastsong_pos);
+                        } catch(MpcError e) {
+                            // If the song is deleted before its time is saved, just go ahead.
+                            if (!(e is MpcError.SYSTEM)) {
+                                debug("go ahead song is aleady deleted");
+                            } else {
+                                throw e;
+                            }
                         }
+                    } else {
+                        debug("skip to save track: current position is bigger or equal than the total time");
                     }
                 }
                 if (song.uri.has_prefix(track_path)) {
@@ -384,8 +391,9 @@ class Main : Object {
             }
 
             lastsong_uri   = song.uri.dup();
-            lastsong_pos   = status.get_elapsed_time();
-            lastsong_state = status.get_state();
+            lastsong_pos   = status.elapsed_time;
+            lastsong_total = status.total_time;
+            lastsong_state = status.state;
             lastsong_timer.start();
         } catch(MpcError e) {
             warning("Error while dispatching idle event: %s", e.message);
