@@ -369,7 +369,7 @@ class Main : Object {
                             cli.set_elapsed_time(lastsong_uri, lastsong_pos);
                         } catch(MpcError e) {
                             // If the song is deleted before its time is saved, just go ahead.
-                            if (!(e is MpcError.SYSTEM)) {
+                            if (e is MpcError.SERVER) {
                                 debug("go ahead song is aleady deleted");
                             } else {
                                 throw e;
