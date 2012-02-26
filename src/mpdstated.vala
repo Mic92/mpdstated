@@ -194,8 +194,10 @@ class Mpc : Object {
     public uint get_elapsed_time(string uri) throws MpcError {
         debug("get elapsed time '%s'.", uri);
         var res = this.conn.send_sticker_get("song", uri, "elapsed_time");
+        if (!res) assert_no_mpd_err(conn);
 
-        if (!res) {
+        var pair = this.conn.recv_sticker();
+        if (pair == null) {
             if (this.conn.get_error() == Mpd.Error.SERVER) {
                 // sticker doesn't exist in this case.
                 this.conn.clear_error();
@@ -204,9 +206,6 @@ class Mpc : Object {
                 assert_no_mpd_err(conn);
             }
         }
-
-        var pair = this.conn.recv_sticker();
-        assert_no_mpd_err(conn);
 
         var last_pos = int.parse(pair.value);
         this.conn.return_sticker(pair);
