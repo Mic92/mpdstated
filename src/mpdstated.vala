@@ -341,6 +341,10 @@ class Main : Object {
 
     public static bool on_app_exit() {
         if (lastsong_uri == null) return true;
+        // unregister handler, so we don't get
+        // in a reconnect loop in case we get no connection
+        cli.on_idle.connect(on_mpd_idle);
+        cli.on_close.connect(on_mpd_close);
         if (lastsong_uri.has_prefix(track_path)) {
             try {
                 cli.set_elapsed_time(lastsong_uri, lastsong_pos);
